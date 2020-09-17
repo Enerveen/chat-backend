@@ -1,8 +1,12 @@
+//Kind of an interface for interacting with users
+
 const users = [];
 
 const addUser = ({ id, name, room }) => {
   name = name.trim().toLowerCase();
   room = room.trim().toLowerCase();
+
+  // "Creating" errors for situations with no user and reserved username, handling will take place on the frontend part
 
   const existingUser = users.find((user) => user.room === room && user.name === name);
 
