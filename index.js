@@ -3,9 +3,8 @@ const express = require('express');
 const socketio = require('socket.io');
 const cors = require('cors');
 
-const { addUser, removeUser, getUser, getUsersInRoom } = require('./users');
-
 const router = require('./router');
+const handleSockets = require('./socketsRouters');
 
 const app = express();
 const server = http.createServer(app);
@@ -15,43 +14,9 @@ app.use(cors());
 app.use(router);
 
 io.on('connect', (socket) => {
-  //backend handling of new user joining chat room
-
-  socket.on('join', ({ name, room }, callback) => {
-    const { error, user } = addUser({ id: socket.id, name, room });
-
-    if (error) return callback(error);
-
-    socket.join(user.room);
-
-    socket.emit('message', { user: 'system', text: `${user.name}, welcome to ${user.room}.` });
-    socket.broadcast.to(user.room).emit('message', { user: 'system', text: `${user.name} has joined!` });
-
-    io.to(user.room).emit('roomData', { room: user.room, users: getUsersInRoom(user.room) });
-
-    callback();
-  });
-
-  //backend handling of new message
-
-  socket.on('sendMessage', (message, callback) => {
-    const user = getUser(socket.id);
-
-    io.to(user.room).emit('message', { user: user.name, text: message });
-
-    callback();
-  });
-
-  //backend handling of user disconnection
-
-  socket.on('disconnect', () => {
-    const user = removeUser(socket.id);
-
-    if (user) {
-      io.to(user.room).emit('message', { user: 'system', text: `${user.name} has left.` });
-      io.to(user.room).emit('roomData', { room: user.room, users: getUsersInRoom(user.room) });
-    }
-  });
+  handleSockets(socket, io);
 });
 
-server.listen(process.env.PORT || 5000, () => console.log(`Server has started.`));
+server.listen(process.env.PORT || 5000, () =>
+  console.log(`Server has started.`)
+);
