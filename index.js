@@ -17,6 +17,4 @@ io.on('connect', (socket) => {
   handleSockets(socket, io);
 });
 
-server.listen(process.env.PORT || 5000, () =>
-  console.log(`Server has started.`)
-);
+server.listen(process.env.PORT || 5000, () => console.log(`Server has started.`));
